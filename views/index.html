@@ -1,0 +1,111 @@
+
+<!DOCTYPE html>
+<html lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>smart AI blessing generator</title>
+    <style>
+        .hidden {
+            display: none;
+        }
+    </style>
+    <script>
+        function showFields() {
+            var eventType = document.getElementById("eventType").value;
+            document.getElementById("birthdayFields").classList.add("hidden");
+            document.getElementById("weddingFields").classList.add("hidden");
+            document.getElementById("birthFields").classList.add("hidden");
+
+            if (eventType === "birthday") {
+                document.getElementById("birthdayFields").classList.remove("hidden");
+            } else if (eventType === "wedding") {
+                document.getElementById("weddingFields").classList.remove("hidden");
+            } else if (eventType === "birth") {
+                document.getElementById("birthFields").classList.remove("hidden");
+            }
+        }
+
+        async function createBlessing(event) {
+            event.preventDefault();
+
+            const formData = new FormData(event.target);
+            const formDataObject = {};
+            formData.forEach((value, key) => {
+                formDataObject[key] = value;
+            });
+
+            try {
+                const response = await fetch('/prompts', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formDataObject),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to generate blessings');
+                }
+
+                const data = await response.json();
+                document.getElementById('greeting1').textContent = data["1"];
+                document.getElementById('greeting2').textContent = data["2"];
+                document.getElementById('greeting3').textContent = data["3"];
+
+            } catch (error) {
+                console.error('Error generating blessings:', error);
+                alert('Failed to generate blessings. Please try again later.');
+            }
+        }
+    </script>
+</head>
+<body>
+
+<h1>Welcome to the smart AI blessing generator</h1>
+
+<form id="greetingForm" onsubmit="createBlessing(event)">
+    <label for="eventType">Select event type:</label>
+    <select id="eventType" name="eventType" onchange="showFields()">
+        <option value="">Event</option>
+        <option value="birthday">Birthday</option>
+        <option value="wedding">Wedding</option>
+        <option value="birth">Birth</option>
+    </select>
+
+    <div id="birthdayFields" class="hidden">
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name"><br>
+        <label for="age">Age</label>
+        <input type="number" id="age" name="age">
+    </div>
+
+    <div id="weddingFields" class="hidden">
+        <label for="coupleNames">Couple Names</label>
+        <input type="text" id="coupleNames" name="coupleNames"><br>
+        <label for="weddingDate">Wedding Date</label>
+        <input type="date" id="weddingDate" name="weddingDate">
+    </div>
+
+    <div id="birthFields" class="hidden">
+        <label for="babyName">Baby Name</label>
+        <input type="text" id="babyName" name="babyName"><br>
+        <label for="gender">Gender</label>
+        <select id="gender" name="gender">
+            <option value="boy">Boy</option>
+            <option value="girl">Girl</option>
+        </select>
+    </div>
+
+    <br>
+    <button type="submit">Create a blessing</button>
+</form>
+
+<h2>Generated Greetings:</h2>
+<p id="greeting1"></p>
+<p id="greeting2"></p>
+<p id="greeting3"></p>
+
+</body>
+</html>
+
